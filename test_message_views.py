@@ -8,6 +8,8 @@
 import os
 from unittest import TestCase
 
+from flask.signals import message_flashed
+
 from models import db, connect_db, Message, User
 
 # BEFORE we import our app, let's set an environmental variable
@@ -49,6 +51,9 @@ class MessageViewTestCase(TestCase):
                                     password="testuser",
                                     image_url=None)
 
+        self.testuser_id = 8989
+        self.testuser.id = self.testuser_id
+
         db.session.commit()
 
     def test_add_message(self):
@@ -71,3 +76,102 @@ class MessageViewTestCase(TestCase):
 
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
+    
+    def test_add_no_session(self):
+        with self.client as c:
+            resp = c.post("/messages/new", data={"text":"test no session"}, follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+    def test_add_invalid_user(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = 999999  # user id does not exist
+
+            resp = c.post("/messages/new", data={"text":"test no session"}, follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+    def test_message_show(self):
+        """ Test message show """
+
+        m = Message(id = 123456, text="I want Alex", user_id = self.testuser_id)
+        db.session.add(m)
+        db.session.commit()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser_id
+
+            m = Message.query.get(123456)
+
+            resp = c.get(f"/messages/{m.id}")
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(m.text, "I want Alex")
+            self.assertIn(m.text, str(resp.data))
+
+    def test_delete_message(self):
+        """ Test delete message """
+
+        m = Message(id=123456, text="test delete message", user_id=self.testuser_id)
+        db.session.add(m)
+        db.session.commit()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser_id
+            
+            resp = c.post("/messages/123456/delete", follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+
+            m = Message.query.get(123456)
+            self.assertIsNone(m)
+
+    def test_unauthorized_message_delete(self):
+    
+        # A second user that will try to delete the message
+        u = User.signup(username="unauthorized-user",
+                        email="testtest@test.com",
+                        password="password",
+                        image_url=None)
+        u.id = 76543
+
+        #Message is owned by testuser
+        m = Message(
+            id=1234,
+            text="a test message",
+            user_id=self.testuser_id
+        )
+        db.session.add_all([u, m])
+        db.session.commit()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = 76543
+
+            resp = c.post("/messages/1234/delete", follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+            m = Message.query.get(1234)
+            self.assertIsNotNone(m)
+
+    def test_message_delete_no_authentication(self):
+    
+        m = Message(
+            id=1234,
+            text="a test message",
+            user_id=self.testuser_id
+        )
+        db.session.add(m)
+        db.session.commit()
+
+        with self.client as c:
+            resp = c.post("/messages/1234/delete", follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+            m = Message.query.get(1234)
+            self.assertIsNotNone(m)
+
