@@ -14,4 +14,5 @@
 - Python Flask
 - Flask Bcrypt, Flask WTForm, SQLAlchemy
 - PostgreSQL
+- Python Unittest
 
