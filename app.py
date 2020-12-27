@@ -230,7 +230,7 @@ def show_likes(user_id):
 @app.route('/messages/<int:message_id>/like', methods=['POST'])
 def add_like(message_id):
     """ Toggle a liked message for the currently-logged-in user """
-    
+
     # todo: to check user logged in or not
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -328,12 +328,13 @@ def messages_show(message_id):
     return render_template('messages/show.html', message=msg)
 
 
-@app.route('/messages/<int:message_id>/delete', methods=["POST"])
+@app.route('/messages/<int:message_id>/delete', methods=["GET","POST"])
 def messages_destroy(message_id):
     """Delete a message."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
+    try: 
+        if not g.user:
+            flash("Access unauthorized.", "danger")
+    except Exception:
         return redirect("/")
 
     msg = Message.query.get(message_id)

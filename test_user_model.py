@@ -121,13 +121,13 @@ class UserModelTestCase(TestCase):
         self.assertIsNotNone(self.user1)
         self.assertEqual(self.user1.username, "test1")
         self.assertEqual(self.user1.email, "email1@gmail.com")
-        self.assertNotEquals(self.user1.password, "password")
+        self.assertNotEqual(self.user1.password, "password")
         self.assertTrue(self.user1.password.startswith("$2b$"))
 
         self.assertIsNotNone(self.user2)
         self.assertEqual(self.user2.username, "test2")
         self.assertEqual(self.user2.email, "email2@gmail.com")
-        self.assertNotEquals(self.user2.password, "password")
+        self.assertNotEqual(self.user2.password, "password")
         self.assertTrue(self.user2.password.startswith("$2b$"))
 
     def test_invalid_username_signup(self):
