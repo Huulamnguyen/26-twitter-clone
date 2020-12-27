@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g, abort
 from flask_debugtoolbar import DebugToolbarExtension
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 from forms import UserAddForm, LoginForm, MessageForm, EditProfileForm
 from models import db, connect_db, User, Message, Likes
@@ -87,7 +87,6 @@ def signup():
 
     else:
         return render_template('users/signup.html', form=form)
-
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -185,25 +184,27 @@ def users_followers(user_id):
     return render_template('users/followers.html', user=user)
 
 
-@app.route('/users/follow/<int:follow_id>', methods=['POST'])
+@app.route('/users/follow/<int:follow_id>', methods=['GET', 'POST'])
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
 
+    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    followed_user = User.query.get_or_404(follow_id)
+        flash("Access unauthorized.", "danger")              
+        return redirect("/")          
+    
+    followed_user = User.query.get_or_404(follow_id)    
     g.user.following.append(followed_user)
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
 
 
-@app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
+@app.route('/users/stop-following/<int:follow_id>', methods=['GET','POST'])
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
 
+    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -263,26 +264,34 @@ def profile():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    
     form = EditProfileForm(obj=g.user)
 
     if form.validate_on_submit():
-        g.user.username = form.username.data
-        g.user.email = form.email.data
-        g.user.image_url = form.image_url.data
-        g.user.header_image_url = form.header_image_url.data
-        g.user.bio = form.bio.data
-        g.user.password = form.password.data
-        
-        db.session.commit()
+        #TODO: ADD TRY/EXCEPT HERE
+        try:
+            g.user.username = form.username.data
+            g.user.email = form.email.data
+            g.user.image_url = form.image_url.data
+            g.user.header_image_url = form.header_image_url.data
+            g.user.bio = form.bio.data
+            g.user.password = form.password.data      
+            db.session.commit()
+
+        except (IntegrityError, InvalidRequestError):
+            flash("Username already taken", 'danger')
+            return redirect('/users/profile')
+
         return redirect(f"/users/{g.user.id}")
     
-    return render_template("users/edit.html", form=form, user=g.user)
+    return render_template("users/edit.html", form=form, user=g.user, user_id = g.user.id) 
 
 
-@app.route('/users/delete', methods=["POST"])
+@app.route('/users/delete', methods=["GET","POST"])
 def delete_user():
     """Delete user."""
 
+    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -305,6 +314,7 @@ def messages_add():
     Show form if GET. If valid, update message and redirect to user page.
     """
 
+    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -329,10 +339,11 @@ def messages_show(message_id):
     return render_template('messages/show.html', message=msg)
 
 
-@app.route('/messages/<int:message_id>/delete', methods=["POST"])
+@app.route('/messages/<int:message_id>/delete', methods=["GET","POST"])
 def messages_destroy(message_id):
     """Delete a message."""
 
+    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -342,10 +353,6 @@ def messages_destroy(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
-
-
-
-
 
 ##############################################################################
 # Homepage and error pages
