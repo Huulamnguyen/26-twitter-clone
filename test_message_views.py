@@ -7,10 +7,7 @@
 
 import os
 from unittest import TestCase
-
-from flask.signals import message_flashed
-
-from models import db, connect_db, Message, User
+from models import db, Message, User
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
