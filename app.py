@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 from forms import UserAddForm, LoginForm, MessageForm, EditProfileForm
-from models import db, connect_db, User, Message, Likes
+from models import db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
 
@@ -204,7 +204,6 @@ def add_follow(follow_id):
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
 
-    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -346,6 +345,11 @@ def messages_destroy(message_id):
     #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
+=======
+    try: 
+        if not g.user:
+            flash("Access unauthorized.", "danger")
+    except Exception:
         return redirect("/")
 
     msg = Message.query.get(message_id)

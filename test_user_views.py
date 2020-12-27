@@ -10,7 +10,7 @@ from unittest import TestCase
 
 from werkzeug.test import Client
 
-from models import db, connect_db, Message, User, Likes, Follows
+from models import db, Message, User, Likes, Follows
 from bs4 import BeautifulSoup
 
 # BEFORE we import our app, let's set an environmental variable
