@@ -230,7 +230,7 @@ def show_likes(user_id):
 @app.route('/messages/<int:message_id>/like', methods=['POST'])
 def add_like(message_id):
     """ Toggle a liked message for the currently-logged-in user """
-    
+
     # todo: to check user logged in or not
     if not g.user:
         flash("Access unauthorized.", "danger")
