@@ -24,8 +24,6 @@
   Test Message views `python -m unittest test_message_views.py`
 ### Languages/ Framework
   HTML/CSS
-  Python Flask
-  Flask Bcrypt, Flask WTForm, SQLAlchemy
+  Python Flask Bcrypt, Flask WTForm, SQLAlchemy, Unittest
   PostgreSQL
-  Python Unittest
 
