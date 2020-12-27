@@ -268,7 +268,7 @@ def profile():
     form = EditProfileForm(obj=g.user)
 
     if form.validate_on_submit():
-        #TODO: ADD TRY/EXCEPT HERE
+        #TODO: ADD TRY/EXCEPT HEREg
         try:
             g.user.username = form.username.data
             g.user.email = form.email.data
