@@ -22,7 +22,7 @@
   Test User views `python -m unittest test_message_views.py`
   Test Message model `python -m unittest test_message_model.py`
   Test Message views `python -m unittest test_message_views.py`
-### Languages/ Framework:
+### Languages/ Framework
   HTML/CSS
   Python Flask
   Flask Bcrypt, Flask WTForm, SQLAlchemy
