@@ -6,7 +6,7 @@ install:
   - pip3 install -r requirements.txt
 
 script:
- - python -m unittest test_user_model.py
- - python -m unittest test_user_views.py
- - python -m unittest test_message_model.py
- - python -m unittest test_message_views.py
+ - python3 -m unittest test_user_model.py
+ - python3 -m unittest test_user_views.py
+ - python3 -m unittest test_message_model.py
+ - python3 -m unittest test_message_views.py
