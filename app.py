@@ -338,21 +338,20 @@ def messages_show(message_id):
     return render_template('messages/show.html', message=msg)
 
 
-@app.route('/messages/<int:message_id>/delete', methods=["GET","POST"])
+@app.route('/messages/<int:message_id>/delete', methods=["POST"])
 def messages_destroy(message_id):
     """Delete a message."""
 
     #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
-=======
-    try: 
-        if not g.user:
-            flash("Access unauthorized.", "danger")
-    except Exception:
         return redirect("/")
 
-    msg = Message.query.get(message_id)
+    msg = Message.query.get_or_404(message_id)
+    if msg.user_id != g.user.id:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+        
     db.session.delete(msg)
     db.session.commit()
 
