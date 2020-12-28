@@ -1,5 +1,7 @@
  ## Twitter Clone
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/81cde98946914a159454cb14cc4e0d54)](https://app.codacy.com/gh/Huulamnguyen/26-twitter-clone?utm_source=github.com&utm_medium=referral&utm_content=Huulamnguyen/26-twitter-clone&utm_campaign=Badge_Grade_Settings)
+
  ### Description
   - Warblers are bright and beautiful songbirds, known for their distinctive TWEETS! 
   - Twitter is one of the most widely used apps in the world, also known for its distinctive Tweets - however, Twitter's tweets can sound a lot uglier than those of a songbird. 
