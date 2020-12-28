@@ -1,7 +1,16 @@
 language: python
 
 python:
-  3.9
+  - 3.5
+  - 3.6
+  - 3.7
+  - 3.9
+before_install:
+  - python --version
+  - pip install -U pip
+  - pip install -U unittest
 
-script:
-- unittest
+install:
+  - pip install ".[test]" . # install package + test dependencies
+
+script: unittest # run tests
