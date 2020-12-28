@@ -1,0 +1,9 @@
+language: python
+python:
+ - "3.9"
+
+script:
+ - python -m unittest test_user_model.py
+ - python -m unittest test_user_views.py
+ - python -m unittest test_message_model.py
+ - python -m unittest test_message_views.py
