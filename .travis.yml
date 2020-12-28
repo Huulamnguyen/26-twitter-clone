@@ -1,12 +1,7 @@
 language: python
-python:
- - "3.9"
 
-install:
-  - pip3 install -r requirements.txt
+python:
+  3.9
 
 script:
- - python3 -m unittest test_user_model.py
- - python3 -m unittest test_user_views.py
- - python3 -m unittest test_message_model.py
- - python3 -m unittest test_message_views.py
+- unittest
