@@ -4,4 +4,4 @@ python:
   - 3.9
 
 script:
-  - python test_user_model.py
+  - python3 -m unittest test_user_model.py
