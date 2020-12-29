@@ -3,4 +3,5 @@ language: python
 python:
   - 3.9
 
-script: unittest # run tests
+script:
+  - python test_user_model.py
