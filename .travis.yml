@@ -1,7 +1,8 @@
 language: python
-
 python:
-  - 3.9
-
-script:
-  - python3 -m unittest test_user_model.py
+  - "3.5"
+  - "3.6"
+  - "3.9"
+cache: pip
+install: "pip install -r requirements.txt"
+script: python test_user_model.py
