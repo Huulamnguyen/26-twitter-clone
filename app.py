@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g, abort
 from flask_debugtoolbar import DebugToolbarExtension
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError, SQLAlchemyError
 
 from forms import UserAddForm, LoginForm, MessageForm, EditProfileForm
 from models import db, connect_db, User, Message
@@ -184,23 +184,26 @@ def users_followers(user_id):
     return render_template('users/followers.html', user=user)
 
 
-@app.route('/users/follow/<int:follow_id>', methods=['GET', 'POST'])
+@app.route('/users/follow/<int:follow_id>', methods=['POST'])
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
 
-    #* I added GET methods to verify if user do not login, user can not access to this route.
+    
     if not g.user:
         flash("Access unauthorized.", "danger")              
         return redirect("/")          
     
-    followed_user = User.query.get_or_404(follow_id)    
-    g.user.following.append(followed_user)
-    db.session.commit()
+    try: 
+        followed_user = User.query.get_or_404(follow_id)    
+        g.user.following.append(followed_user)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        raise e
 
     return redirect(f"/users/{g.user.id}/following")
 
 
-@app.route('/users/stop-following/<int:follow_id>', methods=['GET','POST'])
+@app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
 
@@ -208,9 +211,12 @@ def stop_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get(follow_id)
-    g.user.following.remove(followed_user)
-    db.session.commit()
+    try: 
+        followed_user = User.query.get(follow_id)
+        g.user.following.remove(followed_user)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        raise e
 
     return redirect(f"/users/{g.user.id}/following")
 
@@ -267,7 +273,7 @@ def profile():
     form = EditProfileForm(obj=g.user)
 
     if form.validate_on_submit():
-        #TODO: ADD TRY/EXCEPT HEREg
+        #TODO: ADD TRY/EXCEPT HERE
         try:
             g.user.username = form.username.data
             g.user.email = form.email.data
@@ -286,19 +292,21 @@ def profile():
     return render_template("users/edit.html", form=form, user=g.user, user_id = g.user.id) 
 
 
-@app.route('/users/delete', methods=["GET","POST"])
+@app.route('/users/delete', methods=["POST"])
 def delete_user():
     """Delete user."""
 
-    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
     do_logout()
-
-    db.session.delete(g.user)
-    db.session.commit()
+    
+    try:
+        db.session.delete(g.user)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        raise e
 
     return redirect("/signup")
 
@@ -306,14 +314,12 @@ def delete_user():
 ##############################################################################
 # Messages routes:
 
-@app.route('/messages/new', methods=["GET", "POST"])
+@app.route('/messages/new', methods=["POST"])
 def messages_add():
     """Add a message:
 
     Show form if GET. If valid, update message and redirect to user page.
     """
-
-    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -342,7 +348,6 @@ def messages_show(message_id):
 def messages_destroy(message_id):
     """Delete a message."""
 
-    #* I added GET methods to verify if user do not login, user can not access to this route.
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -351,9 +356,12 @@ def messages_destroy(message_id):
     if msg.user_id != g.user.id:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-        
-    db.session.delete(msg)
-    db.session.commit()
+
+    try:    
+        db.session.delete(msg)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        raise e
 
     return redirect(f"/users/{g.user.id}")
 
